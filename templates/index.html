@@ -1,0 +1,1505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>VoiceFinAI — Mridul</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* ══════════════════════════════════════════════
+       DESIGN TOKENS
+    ══════════════════════════════════════════════ */
+    :root {
+      --bg: #edf0eb;
+      --surface: #ffffff;
+      --surface2: rgba(255,255,255,0.72);
+      --border: rgba(74,143,66,0.15);
+      --border-strong: rgba(74,143,66,0.28);
+      --text: #141a12;
+      --text2: #3d4a3a;
+      --subtext: #6b7a68;
+      --accent: #3a7a32;
+      --accent-light: #4a8f42;
+      --accent-glow: rgba(74,143,66,0.18);
+      --accent-glow-strong: rgba(74,143,66,0.35);
+      --danger: #c0392b;
+      --danger-glow: rgba(192,57,43,0.22);
+      --warn: #b07a18;
+      --warn-glow: rgba(240,192,64,0.25);
+      --good: #22a05a;
+      --good-bg: #e8f8ee;
+      --shadow-sm: 0 1px 4px rgba(0,0,0,.05), 0 4px 16px rgba(0,0,0,.06);
+      --shadow-md: 0 2px 8px rgba(0,0,0,.06), 0 8px 32px rgba(0,0,0,.09);
+      --shadow-lg: 0 4px 16px rgba(0,0,0,.07), 0 16px 48px rgba(0,0,0,.12);
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 22px;
+      --transition: cubic-bezier(0.34,1.56,0.64,1);
+      --ease: cubic-bezier(0.25,0.46,0.45,0.94);
+    }
+
+    /* ══════════════════════════════════════════════
+       RESET & BASE
+    ══════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { height: 100%; }
+    body {
+      font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      /* Subtle mesh gradient background */
+      background-image:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(74,143,66,0.07) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 80% at 80% 90%, rgba(74,143,66,0.05) 0%, transparent 60%);
+    }
+
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent-light); }
+
+    /* ══════════════════════════════════════════════
+       HEADER
+    ══════════════════════════════════════════════ */
+    header {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(237,240,235,0.8);
+      backdrop-filter: blur(20px) saturate(1.4);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex; align-items: center; gap: 8px;
+      font-size: .9rem; font-weight: 800; letter-spacing: -.04em;
+      color: var(--text);
+    }
+    .logo-icon {
+      width: 28px; height: 28px; border-radius: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      display: flex; align-items: center; justify-content: center;
+      box-shadow: 0 2px 8px var(--accent-glow-strong);
+    }
+    .logo-icon svg { width: 16px; height: 16px; fill: #fff; }
+    .logo-name { color: var(--text); }
+    .logo-tag {
+      font-size: .58rem; font-weight: 600; letter-spacing: .08em;
+      text-transform: uppercase; color: var(--subtext);
+      background: var(--accent-glow);
+      padding: 2px 6px; border-radius: 4px;
+    }
+    .reset-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      background: var(--surface2); border: 1px solid var(--border-strong);
+      border-radius: 20px; padding: 6px 14px;
+      font-size: .72rem; font-weight: 600; color: var(--subtext);
+      cursor: pointer; transition: all .2s var(--ease);
+      font-family: inherit;
+    }
+    .reset-btn:hover {
+      background: #fff; color: var(--accent); border-color: var(--accent-light);
+      box-shadow: 0 2px 12px var(--accent-glow);
+      transform: translateY(-1px);
+    }
+
+    /* ══════════════════════════════════════════════
+       LAYOUT — SINGLE SCREEN
+    ══════════════════════════════════════════════ */
+    #conversationTop {
+      height: 54vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 10px; flex-shrink: 0;
+      padding-top: 52px;
+      position: relative;
+    }
+
+    #conversationBottom {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 24px 28px;
+      background: var(--surface2);
+      backdrop-filter: blur(20px) saturate(1.2);
+      border-top: 1px solid var(--border);
+      box-shadow: 0 -4px 24px rgba(0,0,0,.04);
+    }
+
+    /* ══════════════════════════════════════════════
+       AMBIENT ORB — breathes with the AI state
+    ══════════════════════════════════════════════ */
+    .ambient-orb {
+      position: absolute;
+      width: 320px; height: 320px;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+      transition: background 1.4s var(--ease), opacity 1.2s var(--ease), transform 1.4s var(--ease);
+      filter: blur(55px);
+      opacity: 0.38;
+      background: radial-gradient(circle at center, var(--accent-light) 0%, transparent 70%);
+    }
+    .ambient-orb.listening {
+      opacity: 0.28;
+      transform: scale(1);
+      background: radial-gradient(circle at center, #4a8f42 0%, transparent 70%);
+      animation: orbBreath 4s ease-in-out infinite;
+    }
+    .ambient-orb.speaking {
+      opacity: 0.50;
+      transform: scale(1.08);
+      background: radial-gradient(circle at center, #3a7a32 0%, transparent 70%);
+      animation: orbPulse 1.1s ease-in-out infinite;
+    }
+    .ambient-orb.heard {
+      opacity: 0.45;
+      background: radial-gradient(circle at center, #c0392b 0%, transparent 70%);
+      animation: orbPulse .7s ease-in-out infinite;
+    }
+    .ambient-orb.processing {
+      opacity: 0.38;
+      background: radial-gradient(circle at center, #d4a520 0%, transparent 70%);
+      animation: orbSpin 2s linear infinite;
+    }
+    @keyframes orbBreath {
+      0%,100% { transform: scale(0.92); opacity: .22; }
+      50%      { transform: scale(1.04); opacity: .35; }
+    }
+    @keyframes orbPulse {
+      0%,100% { transform: scale(1); }
+      50%      { transform: scale(1.12); }
+    }
+    @keyframes orbSpin {
+      0%   { transform: scale(0.96) rotate(0deg); opacity: .3; }
+      50%  { transform: scale(1.04) rotate(180deg); opacity: .48; }
+      100% { transform: scale(0.96) rotate(360deg); opacity: .3; }
+    }
+
+    /* ══════════════════════════════════════════════
+       AVATAR — multi-ring, premium
+    ══════════════════════════════════════════════ */
+    .avatar-wrap {
+      position: relative; width: 148px; height: 148px;
+      z-index: 1; flex-shrink: 0;
+    }
+    .avatar-wrap img {
+      width: 100%; height: 100%;
+      border-radius: 50%; object-fit: cover;
+      box-shadow: 0 8px 40px rgba(0,0,0,.18), 0 0 0 3px rgba(255,255,255,.9);
+      position: relative; z-index: 2;
+    }
+    /* Three concentric rings */
+    .av-ring {
+      position: absolute; border-radius: 50%;
+      border: 2px solid var(--accent-light);
+      inset: -10px;
+      opacity: .35;
+      transition: all .35s var(--ease);
+      z-index: 1;
+    }
+    .av-ring2 {
+      position: absolute; border-radius: 50%;
+      border: 1.5px solid var(--accent-light);
+      inset: -20px;
+      opacity: .15;
+      transition: all .35s var(--ease);
+      z-index: 1;
+    }
+    .av-ring3 {
+      position: absolute; border-radius: 50%;
+      border: 1px solid var(--accent-light);
+      inset: -32px;
+      opacity: .07;
+      transition: all .35s var(--ease);
+      z-index: 1;
+    }
+    /* Speaking */
+    .av-ring.speaking  { opacity:.95; animation: r1speak 1.1s ease-in-out infinite; }
+    .av-ring2.speaking { opacity:.45; animation: r2speak 1.1s ease-in-out infinite .18s; }
+    .av-ring3.speaking { opacity:.20; animation: r3speak 1.1s ease-in-out infinite .36s; }
+    @keyframes r1speak { 0%,100%{box-shadow:0 0 0 0 rgba(74,143,66,.5)}50%{box-shadow:0 0 0 10px rgba(74,143,66,0)} }
+    @keyframes r2speak { 0%,100%{box-shadow:0 0 0 0 rgba(74,143,66,.3)}50%{box-shadow:0 0 0 14px rgba(74,143,66,0)} }
+    @keyframes r3speak { 0%,100%{box-shadow:0 0 0 0 rgba(74,143,66,.15)}50%{box-shadow:0 0 0 18px rgba(74,143,66,0)} }
+    /* Listening */
+    .av-ring.listening  { opacity:.42; animation: r1listen 3.2s ease-in-out infinite; }
+    .av-ring2.listening { opacity:.18; animation: r1listen 3.2s ease-in-out infinite .6s; }
+    .av-ring3.listening { opacity:.08; animation: r1listen 3.2s ease-in-out infinite 1.2s; }
+    @keyframes r1listen { 0%,100%{opacity:.42;transform:scale(1)}50%{opacity:.6;transform:scale(1.02)} }
+    /* Heard */
+    .av-ring.heard  { border-color:var(--danger); opacity:.9; animation: rheard .6s ease-in-out infinite; }
+    .av-ring2.heard { border-color:var(--danger); opacity:.4; animation: rheard .6s ease-in-out infinite .1s; }
+    .av-ring3.heard { border-color:var(--danger); opacity:.15; animation: rheard .6s ease-in-out infinite .2s; }
+    @keyframes rheard { 0%,100%{box-shadow:0 0 0 0 rgba(192,57,43,.4)}50%{box-shadow:0 0 0 8px rgba(192,57,43,0)} }
+    /* Processing */
+    .av-ring.processing  { border-color:#d4a520; opacity:.8; animation: rproc 1.4s ease-in-out infinite; }
+    .av-ring2.processing { border-color:#d4a520; opacity:.3; animation: rproc 1.4s ease-in-out infinite .28s; }
+    .av-ring3.processing { border-color:#d4a520; opacity:.1; animation: rproc 1.4s ease-in-out infinite .56s; }
+    @keyframes rproc { 0%,100%{opacity:.4;transform:scale(.98)}50%{opacity:1;transform:scale(1.01)} }
+
+    /* ══════════════════════════════════════════════
+       HERO TEXT
+    ══════════════════════════════════════════════ */
+    .hero-name {
+      font-size: 1.05rem; font-weight: 800;
+      letter-spacing: -.03em; color: var(--text);
+      z-index: 1;
+    }
+    .hero-status {
+      font-size: .78rem; font-weight: 500;
+      color: var(--subtext); min-height: 18px;
+      text-align: center; z-index: 1;
+      transition: color .4s var(--ease), opacity .3s;
+      letter-spacing: .01em;
+    }
+    .hero-status.speaking  { color: var(--accent); }
+    .hero-status.heard     { color: var(--danger); }
+    .hero-status.processing{ color: var(--warn);   }
+
+    /* ══════════════════════════════════════════════
+       WAVEFORM BARS — organic sine shape
+    ══════════════════════════════════════════════ */
+    .vol-bars {
+      display: flex; align-items: center; gap: 3px;
+      height: 28px; z-index: 1;
+    }
+    .vol-bar {
+      width: 3px; border-radius: 2px;
+      background: linear-gradient(180deg, var(--accent-light), rgba(74,143,66,.4));
+      min-height: 3px;
+      transition: height .06s ease;
+    }
+
+    /* ══════════════════════════════════════════════
+       LIVE TRANSCRIPT
+    ══════════════════════════════════════════════ */
+    #liveTranscript {
+      font-size: .78rem; font-weight: 400;
+      color: var(--subtext);
+      min-height: 18px; text-align: center;
+      max-width: 360px; font-style: italic;
+      transition: opacity .4s; line-height: 1.5;
+      padding: 0 12px; z-index: 1;
+      opacity: 1;
+    }
+    #liveTranscript:empty { opacity: 0; }
+
+    /* ══════════════════════════════════════════════
+       SPEECH BUBBLE — premium chat style
+    ══════════════════════════════════════════════ */
+    #ariaSpeechBubble {
+      background: #fff;
+      border: 1px solid var(--border-strong);
+      border-radius: 20px 20px 20px 6px;
+      padding: 12px 18px;
+      font-size: .81rem; line-height: 1.65;
+      max-width: 360px; text-align: left;
+      box-shadow: var(--shadow-md);
+      color: var(--text2);
+      font-weight: 450;
+      transition: opacity .35s; z-index: 1;
+      position: relative;
+    }
+    /* Tail */
+    #ariaSpeechBubble::before {
+      content: '';
+      position: absolute;
+      bottom: -7px; left: 20px;
+      width: 14px; height: 8px;
+      background: #fff;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+      filter: drop-shadow(0 2px 2px rgba(0,0,0,.05));
+    }
+
+    /* ══════════════════════════════════════════════
+       BOTTOM PANEL — content area
+    ══════════════════════════════════════════════ */
+    #cardsHeader {
+      font-size: .65rem; font-weight: 700;
+      color: var(--subtext); letter-spacing: .1em;
+      text-transform: uppercase; margin-bottom: 16px;
+    }
+
+    /* ══════════════════════════════════════════════
+       FUND CARDS — premium fintech
+    ══════════════════════════════════════════════ */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px,1fr));
+      gap: 14px;
+    }
+    .cards-grid.single { grid-template-columns: minmax(260px, 440px); }
+    .cards-grid.pair   { grid-template-columns: repeat(2, 1fr); }
+
+    .fund-card {
+      background: #fff;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      border: 1px solid rgba(0,0,0,.05);
+      transition: transform .25s var(--transition), box-shadow .25s var(--ease);
+      animation: cardIn .4s var(--ease) both;
+    }
+    .fund-card:nth-child(2) { animation-delay: .08s; }
+    .fund-card:nth-child(3) { animation-delay: .16s; }
+    @keyframes cardIn {
+      from { opacity:0; transform:translateY(14px) scale(.98); }
+      to   { opacity:1; transform:translateY(0) scale(1); }
+    }
+    .fund-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-lg);
+    }
+    .cbar { height: 3px; }
+    .bg { background: linear-gradient(90deg, #22a05a, #6dd5a0); }
+    .bb { background: linear-gradient(90deg, #2980b9, #74c0ff); }
+    .bo { background: linear-gradient(90deg, #d4850a, #f5c842); }
+    .cbody { padding: 16px; display: flex; flex-direction: column; gap: 13px; }
+    .slot-chip {
+      display: inline-block;
+      background: var(--accent-glow);
+      color: var(--accent);
+      font-size: .58rem; font-weight: 700;
+      padding: 2px 7px; border-radius: 5px;
+      letter-spacing: .04em; text-transform: uppercase;
+    }
+    .fname {
+      font-size: .86rem; font-weight: 700;
+      line-height: 1.35; margin-top: 4px;
+      color: var(--text); letter-spacing: -.01em;
+    }
+    .fhouse {
+      font-size: .68rem; color: var(--subtext);
+      margin-top: 2px; font-weight: 450;
+    }
+    .risk-chip {
+      display: inline-block; border-radius: 20px;
+      font-size: .63rem; font-weight: 700;
+      padding: 3px 10px; letter-spacing: .02em;
+    }
+    .risk-low, .risk-low-mod { background: #e2f7ed; color: #1a7040; }
+    .risk-mod                { background: #fef9e5; color: #9a6c0a; }
+    .risk-mod-high           { background: #fdebd0; color: #b35b12; }
+    .risk-high, .risk-very-high { background: #fdedec; color: #b52a1e; }
+    .rets {
+      display: flex;
+      background: #f8faf7;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+    .rc {
+      flex: 1; padding: 8px 4px; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .rc:last-child { border-right: none; }
+    .rcl {
+      font-size: .55rem; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: .05em;
+      font-weight: 600;
+    }
+    .rcv {
+      font-size: .9rem; font-weight: 800;
+      color: var(--good); margin-top: 3px;
+      letter-spacing: -.02em;
+    }
+    .metas { display: flex; justify-content: space-between; }
+    .mi { display: flex; flex-direction: column; gap: 2px; }
+    .ml {
+      font-size: .56rem; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: .06em;
+      font-weight: 600;
+    }
+    .mv { font-size: .78rem; font-weight: 700; color: var(--text2); }
+    .isin {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .58rem; color: var(--border-strong);
+      text-align: right; letter-spacing: .04em;
+    }
+
+    /* ══════════════════════════════════════════════
+       OOS / CLARIFY
+    ══════════════════════════════════════════════ */
+    .oos {
+      padding: 32px 24px; text-align: center;
+      display: flex; flex-direction: column;
+      align-items: center; gap: 14px;
+      animation: cardIn .35s var(--ease) both;
+    }
+    .oos-icon { font-size: 2.4rem; }
+    .oos-title { font-size: 1rem; font-weight: 800; letter-spacing: -.02em; }
+    .oos-body  { font-size: .84rem; color: var(--subtext); line-height: 1.6; }
+    .oos-quote {
+      background: #fff; border-radius: var(--radius-sm);
+      padding: 14px 18px; font-size: .84rem; line-height: 1.65;
+      box-shadow: var(--shadow-sm); width: 100%; max-width: 480px;
+      border-left: 3px solid var(--accent-light);
+      text-align: left; color: var(--text2);
+    }
+
+    /* ══════════════════════════════════════════════
+       CHART
+    ══════════════════════════════════════════════ */
+    .chart-container { display: flex; flex-direction: column; gap: 16px; animation: cardIn .4s var(--ease) both; }
+    .chart-header-card {
+      background: #fff; border-radius: var(--radius-md);
+      padding: 18px 22px; box-shadow: var(--shadow-sm);
+      border-left: 4px solid var(--accent-light);
+      display: flex; justify-content: space-between;
+      align-items: center; flex-wrap: wrap; gap: 12px;
+      border: 1px solid var(--border);
+      border-left-width: 4px;
+    }
+    .ch-title { font-size: 1rem; font-weight: 800; letter-spacing: -.02em; }
+    .ch-sub { font-size: .72rem; color: var(--subtext); margin-top: 3px; }
+    .ch-pills { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+    .ch-pill {
+      font-size: .69rem; font-weight: 600;
+      padding: 4px 11px; border-radius: 20px;
+      background: #f0f3ef; color: var(--text2);
+      border: 1px solid var(--border);
+    }
+    .ch-pill.accent { background: var(--good-bg); color: var(--good); border-color: rgba(34,160,90,.2); }
+    .chart-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 14px; }
+    @media (max-width:900px) { .chart-grid { grid-template-columns: 1fr; } }
+    .chart-card {
+      background: #fff; border-radius: var(--radius-md);
+      padding: 18px; box-shadow: var(--shadow-sm);
+      display: flex; flex-direction: column; gap: 14px;
+      border: 1px solid var(--border);
+    }
+    .chart-card-title {
+      font-size: .68rem; font-weight: 700; color: var(--subtext);
+      text-transform: uppercase; letter-spacing: .07em;
+    }
+    .cagr-bars { display: flex; flex-direction: column; gap: 12px; margin-top: 4px; }
+    .cagr-row  { display: flex; flex-direction: column; gap: 6px; }
+    .cagr-label-row { display: flex; justify-content: space-between; font-size: .76rem; font-weight: 600; }
+    .cagr-bar-track { background: #edf0eb; height: 10px; border-radius: 5px; overflow: hidden; }
+    .cagr-bar-fill  {
+      height: 100%; border-radius: 5px;
+      background: linear-gradient(90deg, var(--good), var(--accent-light));
+      transition: width 1s cubic-bezier(0.22,0.61,0.36,1);
+    }
+    .proj-list { display: flex; flex-direction: column; gap: 10px; }
+    .proj-row {
+      background: #f7faf6; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 11px 14px;
+      display: flex; flex-direction: column; gap: 7px;
+    }
+    .proj-top  { display: flex; justify-content: space-between; align-items: center; }
+    .proj-tenure { font-size: .8rem; font-weight: 700; }
+    .proj-fv     { font-size: .95rem; font-weight: 800; color: var(--good); letter-spacing: -.02em; }
+    .proj-bar-track { background: #dde8db; height: 8px; border-radius: 4px; overflow: hidden; display: flex; }
+    .proj-bar-invested { background: #b0bfad; height: 100%; transition: width .9s cubic-bezier(0.22,0.61,0.36,1); }
+    .proj-bar-gain     { background: linear-gradient(90deg,var(--good),#5dcc8e); height: 100%; transition: width .9s cubic-bezier(0.22,0.61,0.36,1); }
+    .proj-bottom { display: flex; justify-content: space-between; font-size: .68rem; color: var(--subtext); }
+    .proj-legend { display: flex; gap: 12px; font-size: .66rem; color: var(--subtext); }
+    .leg-dot    { width: 8px; height: 8px; border-radius: 2px; display: inline-block; margin-right: 4px; }
+    .whatif-panel {
+      background: #fff; border-radius: var(--radius-md);
+      padding: 16px 20px; box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 12px;
+    }
+    .whatif-header  { display: flex; justify-content: space-between; align-items: center; }
+    .whatif-title   { font-size: .68rem; font-weight: 700; color: var(--subtext); text-transform: uppercase; letter-spacing: .07em; }
+    .whatif-badge   { background: var(--accent-glow); color: var(--accent); font-size: .62rem; padding: 3px 9px; border-radius: 6px; font-weight: 700; }
+    .whatif-grid    { display: grid; grid-template-columns: 1.2fr 1fr auto; gap: 20px; align-items: center; }
+    @media (max-width:850px) { .whatif-grid { grid-template-columns: 1fr; gap: 12px; } }
+    .slider-group   { display: flex; flex-direction: column; gap: 7px; }
+    .slider-top     { display: flex; justify-content: space-between; font-size: .76rem; font-weight: 600; }
+    .slider-val     { font-weight: 800; color: var(--accent); }
+    .slider-input   { -webkit-appearance: none; appearance: none; width: 100%; height: 5px; border-radius: 3px; background: #d8ddd7; outline: none; }
+    .slider-input::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: var(--accent-light); cursor: pointer;
+      box-shadow: 0 1px 6px var(--accent-glow-strong);
+      transition: transform .15s var(--transition);
+    }
+    .slider-input::-webkit-slider-thumb:hover { transform: scale(1.2); }
+    .stepup-toggle {
+      display: flex; align-items: center; gap: 10px;
+      cursor: pointer; user-select: none;
+      background: #f4f7f3; padding: 9px 13px;
+      border-radius: 10px; border: 1px solid var(--border);
+    }
+    .toggle-switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+    .toggle-switch input { opacity: 0; width: 0; height: 0; }
+    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: #c8d0c6; border-radius: 20px; transition: .3s; }
+    .toggle-slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background: #fff; border-radius: 50%; transition: .3s; }
+    input:checked + .toggle-slider { background: var(--accent-light); }
+    input:checked + .toggle-slider:before { transform: translateX(16px); }
+    .toggle-label { font-size: .74rem; font-weight: 600; color: var(--text2); }
+
+    /* ══════════════════════════════════════════════
+       GOAL
+    ══════════════════════════════════════════════ */
+    .goal-container { display: flex; flex-direction: column; gap: 16px; animation: cardIn .4s var(--ease) both; }
+    .goal-header-card {
+      background: #fff; border-radius: var(--radius-md);
+      padding: 20px 22px; box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border); border-left: 4px solid var(--accent-light);
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px;
+    }
+    .goal-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--good-bg); color: var(--good);
+      font-size: .68rem; font-weight: 800; padding: 4px 11px;
+      border-radius: 20px; text-transform: uppercase; letter-spacing: .06em;
+    }
+    .goal-target-title { font-size: 1.3rem; font-weight: 900; margin-top: 5px; letter-spacing: -.03em; }
+    .goal-target-sub   { font-size: .76rem; color: var(--subtext); margin-top: 3px; }
+    .goal-stat-box {
+      display: flex; gap: 20px; background: #f4f7f3;
+      padding: 12px 18px; border-radius: var(--radius-sm); border: 1px solid var(--border);
+    }
+    .goal-stat-item { display: flex; flex-direction: column; gap: 3px; }
+    .goal-stat-label { font-size: .62rem; color: var(--subtext); text-transform: uppercase; font-weight: 700; letter-spacing: .06em; }
+    .goal-stat-val   { font-size: 1.22rem; font-weight: 900; color: var(--accent); letter-spacing: -.03em; }
+    .strategy-grid   { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px,1fr)); gap: 14px; }
+    .strat-card {
+      background: #fff; border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm); border: 1px solid var(--border);
+      padding: 18px; display: flex; flex-direction: column; gap: 12px;
+      position: relative; transition: transform .25s var(--transition), box-shadow .25s var(--ease);
+    }
+    .strat-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-lg); }
+    .strat-card.recommended {
+      border: 1.5px solid var(--accent-light);
+      background: linear-gradient(180deg, #fff 0%, #f5fbf5 100%);
+    }
+    .rec-tag {
+      position: absolute; top: -11px; right: 16px;
+      background: linear-gradient(135deg, var(--accent), var(--accent-light));
+      color: #fff; font-size: .58rem; font-weight: 800;
+      padding: 3px 10px; border-radius: 10px; letter-spacing: .06em; text-transform: uppercase;
+      box-shadow: 0 2px 8px var(--accent-glow-strong);
+    }
+    .strat-header  { display: flex; justify-content: space-between; align-items: baseline; }
+    .strat-name    { font-size: .92rem; font-weight: 800; letter-spacing: -.02em; }
+    .strat-cagr    { font-size: .82rem; font-weight: 800; color: var(--good); }
+    .strat-fund    { font-size: .72rem; color: var(--subtext); }
+    .strat-sip-block {
+      background: #f4f7f3; padding: 11px 14px;
+      border-radius: 10px; text-align: center;
+      border: 1px dashed var(--border-strong);
+    }
+    .strat-sip-label { font-size: .62rem; color: var(--subtext); text-transform: uppercase; font-weight: 700; letter-spacing: .06em; }
+    .strat-sip-val   { font-size: 1.28rem; font-weight: 900; margin-top: 3px; letter-spacing: -.03em; }
+    .strat-details   { display: flex; flex-direction: column; gap: 6px; font-size: .7rem; }
+    .strat-detail-row{ display: flex; justify-content: space-between; color: var(--subtext); }
+    .strat-detail-row strong { color: var(--text2); font-weight: 700; }
+    .stepup-banner {
+      background: linear-gradient(135deg, #172e18, #1f4821);
+      color: #fff; border-radius: var(--radius-md);
+      padding: 20px 24px; display: flex;
+      justify-content: space-between; align-items: center;
+      box-shadow: var(--shadow-md); gap: 16px; flex-wrap: wrap;
+    }
+    .stepup-banner-left  { display: flex; flex-direction: column; gap: 5px; max-width: 500px; }
+    .stepup-banner-title { font-size: .95rem; font-weight: 800; display: flex; align-items: center; gap: 8px; letter-spacing: -.02em; }
+    .stepup-banner-sub   { font-size: .76rem; opacity: .82; line-height: 1.5; }
+    .stepup-banner-right { display: flex; align-items: center; gap: 16px; }
+    .stepup-val-box  { text-align: right; }
+    .stepup-val-label{ font-size: .62rem; opacity: .75; text-transform: uppercase; letter-spacing: .06em; }
+    .stepup-val      { font-size: 1.4rem; font-weight: 900; color: #8fe637; letter-spacing: -.03em; }
+
+    /* ══════════════════════════════════════════════
+       DISCLAIMER
+    ══════════════════════════════════════════════ */
+    .disclaimer {
+      font-size: .58rem; color: var(--subtext);
+      text-align: center; line-height: 1.5; margin-top: 16px;
+      opacity: .75;
+    }
+
+    /* ══════════════════════════════════════════════
+       KEYFRAMES
+    ══════════════════════════════════════════════ */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* Product shell: clear entry points, readable states, and a real text fallback. */
+    body { background: #f6f8f5; }
+    header { padding: 14px clamp(16px, 4vw, 48px); background: rgba(255,255,255,.92); }
+    .logo-tag { background: #eef5ec; color: #53794d; }
+    #conversationTop {
+      height: 43vh; min-height: 290px; max-height: 410px;
+      padding: 76px 20px 18px; gap: 7px;
+      background: radial-gradient(ellipse at 50% 5%, #e6f2e2 0, rgba(246,248,245,0) 65%);
+    }
+    .avatar-wrap { width: 92px; height: 92px; }
+    .av-ring { inset: -7px; }
+    .av-ring2 { inset: -14px; }
+    .av-ring3 { inset: -22px; }
+    .hero-name { font-size: 1rem; }
+    .hero-status { font-size: .82rem; color: #536052; }
+    .hero-kicker { z-index: 1; color: #587c51; font-size: .62rem; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .hero-title { z-index: 1; text-align: center; font-size: clamp(1.15rem, 2.4vw, 1.55rem); font-weight: 750; letter-spacing: -.04em; line-height: 1.15; }
+    .hero-copy { z-index: 1; color: var(--subtext); text-align: center; font-size: .78rem; max-width: 430px; line-height: 1.5; }
+    .voice-control {
+      z-index: 2; border: 0; border-radius: 999px; padding: 10px 20px;
+      background: #2f6e35; color: white; box-shadow: 0 8px 22px rgba(47,110,53,.2);
+      font-family: inherit; font-size: .82rem; font-weight: 700; line-height: 1.2; cursor: pointer; transition: transform .18s, background .18s;
+    }
+    .voice-control:hover { background: #245b2a; transform: translateY(-1px); }
+    .voice-control[aria-pressed="true"] { background: #a83c32; }
+    .privacy-note { z-index: 1; color: #758071; font-size: .65rem; text-align: center; max-width: 440px; line-height: 1.35; }
+    #conversationBottom { padding: 22px clamp(16px, 4vw, 48px) 156px; background: transparent; border-top: 1px solid #e6ebe4; box-shadow: none; }
+    #conversationFeed { width: min(100%, 900px); margin: 0 auto 18px; display: flex; flex-direction: column; gap: 10px; }
+    .message-row { display: flex; width: 100%; animation: fadeUp .25s ease both; }
+    .message-row.user { justify-content: flex-end; }
+    .message-bubble { max-width: min(82%, 650px); padding: 11px 15px; border: 1px solid #e3e9e0; border-radius: 16px 16px 16px 5px; background: white; color: #263324; font-size: .82rem; line-height: 1.55; box-shadow: 0 3px 12px rgba(30,55,28,.05); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .message-row.user .message-bubble { border-color: #d8e8d4; border-radius: 16px 16px 5px 16px; background: #eaf4e7; }
+    #cardsHeader { max-width: 1120px; margin: 0 auto 14px; color: #5b6858; }
+    .cards-grid, .chart-container, .goal-container { max-width: 1120px; margin-left: auto; margin-right: auto; }
+    .disclaimer { max-width: 1120px; margin: 20px auto 0; color: #748071; text-align: center; font-size: .68rem; }
+    .prompt-row { z-index: 1; display: flex; justify-content: center; flex-wrap: wrap; gap: 7px; margin-top: 3px; }
+    .followup-row { display:flex; align-items:center; flex-wrap:wrap; gap:8px; margin: 10px 0 2px; }
+    .followup-row[hidden] { display:none; }
+    .followup-label { color:var(--subtext); font-size:.72rem; font-weight:700; margin-right:3px; }
+    .followup-chip { background:#fff; border:1px solid var(--border); border-radius:999px; padding:7px 12px; color:var(--text2); font-family:inherit; font-size:.72rem; font-weight:600; cursor:pointer; }
+    .followup-chip:hover { border-color:var(--accent-light); color:var(--accent); }
+    .prompt-chip { border: 1px solid #dce6d9; border-radius: 999px; background: rgba(255,255,255,.78); padding: 7px 11px; color: #40543d; font-family: inherit; font-size: .68rem; font-weight: 600; line-height: 1.2; cursor: pointer; }
+    .prompt-chip:hover { border-color: #8eb28a; background: white; }
+    .voice-player { display:block; width:min(calc(100% - 32px), 760px); margin:8px auto 0; height:40px; accent-color:#255d2a; }
+    .voice-player[hidden] { display:none; }
+    .composer {
+      position: fixed; z-index: 150; left: 0; right: 0; bottom: 0;
+      padding: 14px clamp(14px, 4vw, 48px) 12px;
+      background: linear-gradient(180deg, rgba(246,248,245,0), #f6f8f5 18%);
+    }
+    .composer-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 9px; align-items: center; padding: 8px; border: 1px solid #dce5d9; border-radius: 18px; background: white; box-shadow: 0 10px 35px rgba(30,55,28,.1); }
+    .composer input { flex: 1; min-width: 0; border: 0; outline: 0; padding: 11px 12px; background: transparent; color: #182116; font-family: inherit; font-size: .84rem; font-weight: 500; line-height: 1.4; }
+    .composer input::placeholder { color: #889284; }
+    .send-button { border: 0; border-radius: 12px; padding: 10px 15px; background: #203d25; color: white; font-family: inherit; font-size: .78rem; font-weight: 700; line-height: 1.2; cursor: pointer; }
+    .send-button:hover { background: #315e37; }
+    .composer-caption { max-width: 900px; margin: 7px auto 0; color: #7c8579; text-align: center; font-size: .62rem; }
+    #ariaSpeechBubble { max-width: min(520px, 90vw); }
+    @media (max-width: 640px) {
+      #conversationTop { height: 42vh; min-height: 270px; padding-top: 66px; }
+      #conversationBottom { padding: 16px 14px 150px; }
+      .composer { padding: 10px 12px 9px; }
+      .composer-inner { border-radius: 15px; }
+      .send-button { padding: 10px 12px; }
+      .cards-grid, .cards-grid.pair, .cards-grid.single { grid-template-columns: 1fr; }
+    }
+    @media (max-height: 700px) {
+      #conversationTop { height: auto; min-height: 0; max-height: none; padding: 66px 14px 12px; gap: 5px; }
+      .avatar-wrap, .hero-kicker { display: none; }
+      .hero-title { font-size: 1.12rem; }
+      .hero-copy { max-width: 480px; font-size: .73rem; }
+      .voice-control { padding: 8px 18px; }
+      .privacy-note { font-size: .61rem; }
+      .prompt-row { gap: 5px; }
+      .prompt-chip { padding: 6px 9px; font-size: .63rem; }
+      #conversationBottom { padding-top: 12px; }
+    }
+    body.has-conversation #conversationTop { height: auto; min-height: 0; max-height: none; padding-bottom: 12px; }
+    body.has-conversation .hero-title, body.has-conversation .hero-copy, body.has-conversation .hero-kicker,
+    body.has-conversation #promptRow { display: none; }
+    body.has-conversation .hero-status { min-height: 0; }
+    @media (max-width: 640px) {
+      .message-bubble { max-width: 92%; }
+      #conversationFeed { margin-bottom: 14px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+    </div>
+    <span class="logo-name">VoiceFinAI</span>
+    <span class="logo-tag">VOICE DEMO</span>
+  </div>
+  <div class="header-actions">
+    <button class="reset-btn" onclick="goHome()">↺ Reset</button>
+  </div>
+</header>
+
+<!-- Conversation top — avatar + state -->
+<div id="conversationTop">
+  <div class="ambient-orb" id="ambientOrb"></div>
+  <div class="avatar-wrap">
+    <div class="av-ring"  id="ringA"></div>
+    <div class="av-ring2" id="ringA2"></div>
+    <div class="av-ring3" id="ringA3"></div>
+    <img src="/static/madhur.jpg" alt="Mridul"/>
+  </div>
+  <div class="hero-name">Mridul</div>
+  <div class="hero-kicker">Voice-first mutual fund explorer</div>
+  <div class="hero-title">Your mutual-fund advisor, ready to talk.</div>
+  <div class="hero-copy">Start a conversation with Mridul in Hindi, English, or Hinglish — or type if you prefer.</div>
+  <div class="hero-status" id="heroStatus" role="status" aria-live="polite">Namaste! Main Mridul hoon. Aapki madad ke liye taiyaar hoon.</div>
+  <div class="vol-bars" id="volA" style="display:none">
+    <div class="vol-bar" id="va0"></div>
+    <div class="vol-bar" id="va1"></div>
+    <div class="vol-bar" id="va2"></div>
+    <div class="vol-bar" id="va3"></div>
+    <div class="vol-bar" id="va4"></div>
+    <div class="vol-bar" id="va5"></div>
+    <div class="vol-bar" id="va6"></div>
+  </div>
+  <div id="liveTranscript" aria-live="polite"></div>
+  <button class="voice-control" id="voiceButton" type="button" aria-pressed="false" aria-label="Start a conversation with Mridul" onclick="toggleVoice()">Start conversation</button>
+  <div class="privacy-note" id="voicePrivacy">Your mic stays off until you choose Start conversation. Mridul will greet you, then listen.</div>
+  <div class="prompt-row" id="promptRow" aria-label="Example questions">
+    <button class="prompt-chip" type="button" onclick="usePrompt('Show me low risk mutual funds')">Explore lower-risk funds</button>
+    <button class="prompt-chip" type="button" onclick="usePrompt('Compare the first two funds')">Compare two funds</button>
+    <button class="prompt-chip" type="button" onclick="usePrompt('Plan a SIP for my goal')">Plan a SIP goal</button>
+  </div>
+</div>
+
+<!-- Conversation bottom — cards / chart / goal -->
+<div id="conversationBottom">
+  <div id="conversationFeed" role="log" aria-live="polite" aria-relevant="additions text"></div>
+  <div id="cardsHeader"></div>
+  <div id="cardsGrid" class="cards-grid" style="display:none"></div>
+  <div class="followup-row" id="followupRow" aria-label="Questions you can ask next" hidden>
+    <span class="followup-label">Ask about</span>
+    <button class="followup-chip" type="button" onclick="usePrompt('Why did you choose these funds?')">Why these funds?</button>
+    <button class="followup-chip" type="button" onclick="usePrompt('What is the risk and minimum SIP?')">Risk & minimum SIP</button>
+    <button class="followup-chip" type="button" onclick="usePrompt('Compare the first two funds')">Compare options</button>
+    <button class="followup-chip" type="button" onclick="usePrompt('Show me the returns and expense ratio')">Returns & fees</button>
+  </div>
+  <div id="chartContainer" class="chart-container" style="display:none"></div>
+  <div id="goalContainer" class="goal-container" style="display:none"></div>
+  <div class="disclaimer">NAV history via MFAPI · Risk buckets and minimum SIP values are estimates, not current scheme disclosures · Not investment advice.</div>
+</div>
+
+<audio id="aud" class="voice-player" controls hidden aria-label="Voice response"></audio>
+<form class="composer" id="queryForm" autocomplete="off" onsubmit="submitTextQuery(event)">
+  <div class="composer-inner">
+    <input id="queryInput" name="query" type="text" maxlength="500" placeholder="Ask about mutual funds, NAV, or SIP goals…" aria-label="Ask VoiceFinAI a question"/>
+    <button class="send-button" type="submit">Send</button>
+  </div>
+  <div class="composer-caption">Educational information only · Not investment advice · Never share account or payment details</div>
+</form>
+
+<script>
+// ═══════════════════════════════════════════
+//  State
+// ═══════════════════════════════════════════
+const S = { IDLE:'idle', SPEAKING:'speaking', LISTENING:'listening', HEARD:'heard', PROCESSING:'processing' };
+let state = S.IDLE;
+let audioCtx=null, analyser=null, recorder=null, micStream=null;
+let chunks=[], speechStart=null, silenceStart=null, rafId=null;
+let micGranted = false, voiceEnabled = false;
+let activeResponseId = 0, activeAudioUrl = null;
+
+const THRESH  = 0.018;
+const MIN_MS  = 600;
+const SIL_MS  = 1200;
+
+// ═══════════════════════════════════════════
+//  Boot
+// ═══════════════════════════════════════════
+window.addEventListener('load', () => {
+  setStatus('Press Start conversation to hear Mridul, or type a question.');
+});
+
+// ═══════════════════════════════════════════
+//  VAD
+// ═══════════════════════════════════════════
+async function listen() {
+  if (!voiceEnabled || state === S.SPEAKING || state === S.PROCESSING) return;
+  try {
+    if (!micStream) micStream = await navigator.mediaDevices.getUserMedia({
+      audio: { echoCancellation:true, noiseSuppression:true, autoGainControl:true, sampleRate:16000 }
+    });
+  } catch(e) { voiceEnabled=false; updateVoiceButton(); setStatus('Microphone unavailable. You can type your question below.'); return; }
+
+  audioCtx = new AudioContext();
+  analyser = audioCtx.createAnalyser();
+  analyser.fftSize = 512;
+  audioCtx.createMediaStreamSource(micStream).connect(analyser);
+
+  chunks=[]; speechStart=null; silenceStart=null;
+  recorder = new MediaRecorder(micStream);
+  recorder.ondataavailable = e => { if(e.data.size>0) chunks.push(e.data); };
+  recorder.onstop = onStop;
+  recorder.start(100);
+
+  transition(S.LISTENING);
+  showVolBars(true);
+  vadLoop();
+}
+
+function vadLoop() {
+  if (state !== S.LISTENING && state !== S.HEARD) return;
+  const buf = new Uint8Array(analyser.frequencyBinCount);
+  analyser.getByteTimeDomainData(buf);
+  let sum=0; for(const v of buf){const f=v/128-1;sum+=f*f;}
+  const rms = Math.sqrt(sum/buf.length);
+  animVol(rms);
+  const now = Date.now();
+  if (rms > THRESH) {
+    if (!speechStart) { speechStart=now; transition(S.HEARD); }
+    silenceStart = null;
+  } else if (speechStart) {
+    if (!silenceStart) silenceStart=now;
+    if ((now-speechStart)>=MIN_MS && (now-silenceStart)>=SIL_MS) { finalize(); return; }
+  }
+  rafId = requestAnimationFrame(vadLoop);
+}
+
+function finalize() {
+  if(rafId) cancelAnimationFrame(rafId);
+  showVolBars(false);
+  transition(S.PROCESSING);
+  if(recorder && recorder.state!=='inactive') recorder.stop();
+}
+
+function stopVAD() {
+  if(rafId) cancelAnimationFrame(rafId);
+  if(recorder && recorder.state!=='inactive') recorder.stop();
+  if(micStream) micStream.getTracks().forEach(t=>t.stop());
+  if(audioCtx) audioCtx.close().catch(()=>{});
+  audioCtx=analyser=recorder=micStream=null;
+  chunks=[]; speechStart=silenceStart=null;
+  showVolBars(false);
+}
+
+async function onStop() {
+  if(micStream) micStream.getTracks().forEach(t=>t.stop());
+  if(audioCtx) audioCtx.close().catch(()=>{});
+  const hadSpeech = speechStart!==null && chunks.length>0;
+  if (!hadSpeech) {
+    audioCtx=analyser=recorder=micStream=null; chunks=[];
+    if (voiceEnabled) { await delay(350); listen(); }
+    return;
+  }
+  const mimeType = recorder?.mimeType || 'audio/webm';
+  audioCtx=analyser=recorder=micStream=null;
+  const blob = new Blob(chunks,{type:mimeType}); chunks=[];
+  await sendAudio(blob);
+}
+
+// ═══════════════════════════════════════════
+//  Transcribe
+// ═══════════════════════════════════════════
+async function sendAudio(blob) {
+  setStatus('Processing…');
+  try {
+    const form = new FormData();
+    form.append('audio', blob, 'speech.webm');
+    const res  = await fetch('/transcribe',{method:'POST',body:form});
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Speech recognition failed');
+    const q = (data.transcript||'').trim();
+    if (!q) {
+      transition(S.IDLE);
+      setStatus("I didn't catch that. I'm still listening—please repeat, or type a follow-up.");
+      if (voiceEnabled) { await delay(650); if (voiceEnabled) listen(); }
+      return;
+    }
+
+    document.getElementById('liveTranscript').textContent = '\u201c' + q + '\u201d';
+    addMessage(q, 'user');
+    setStatus('Thinking…');
+    await runPipeline(q);
+  } catch(err) {
+    voiceEnabled=false; updateVoiceButton();
+    setStatus(err.message || 'Speech recognition failed. Type your question below.');
+  }
+}
+
+async function toggleVoice() {
+  if (voiceEnabled) {
+    voiceEnabled = false;
+    stopVAD();
+    const audio=document.getElementById('aud');
+    audio.pause();
+    transition(S.IDLE);
+    setStatus('Conversation paused. Type a question or start again when you are ready.');
+    updateVoiceButton();
+    return;
+  }
+  if (!window.navigator?.mediaDevices?.getUserMedia) {
+    setStatus('This browser does not support microphone input. You can type instead.');
+    return;
+  }
+
+  voiceEnabled=true;
+  updateVoiceButton();
+  setStatus('Mridul is greeting you?');
+  transition(S.SPEAKING);
+  setRing('ringA','speaking');
+  const greeting='Namaste! Main Mridul hoon, aapka mutual fund advisor. Aaj aap kis baare mein baat karna chahenge? SIP shuru karni hai, funds compare karne hain, ya apne kisi goal ke liye invest karna hai?';
+  addMessage(greeting,'assistant');
+
+  // Request the microphone from this button gesture, but do not record until the greeting ends.
+  const micRequest=navigator.mediaDevices.getUserMedia({
+    audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true,sampleRate:16000}
+  });
+  const audio=document.getElementById('aud');
+  audio.pause();
+  audio.currentTime=0;
+  audio.src='/static/greetings/mridul-welcome-hi.mp3';
+  audio.controls=false;
+  audio.hidden=true;
+  let greetingFinished=false;
+  let listenStarted=false;
+  const beginListening=()=>{
+    if(!greetingFinished||!micStream||!voiceEnabled||listenStarted)return;
+    listenStarted=true;
+    transition(S.IDLE);
+    setStatus('Your turn. Tell Mridul what you are looking for.');
+    setTimeout(()=>{if(voiceEnabled)listen();},700);
+  };
+  audio.onended=()=>{greetingFinished=true;beginListening();};
+  audio.onerror=()=>{
+    greetingFinished=true;
+    setStatus('Greeting audio could not play. You can still talk or type.');
+    beginListening();
+  };
+  audio.play().catch(()=>{
+    audio.controls=true;
+    audio.hidden=false;
+    setStatus('Tap play to hear Mridul?s greeting.');
+  });
+
+  try {
+    const grantedStream=await micRequest;
+    if(!voiceEnabled){grantedStream.getTracks().forEach(track=>track.stop());return;}
+    micStream=grantedStream;
+    beginListening();
+  } catch(error) {
+    voiceEnabled=false;
+    updateVoiceButton();
+    transition(S.IDLE);
+    setStatus(error.name==='NotAllowedError'?'Microphone permission was not granted. You can type instead.':'Could not open the microphone. You can type instead.');
+  }
+}
+
+function updateVoiceButton() {
+  const button=document.getElementById('voiceButton');
+  if(!button) return;
+  button.textContent=voiceEnabled?'Stop conversation':'Start conversation';
+  button.setAttribute('aria-label',voiceEnabled?'Stop the conversation':'Start a conversation with Mridul');
+  button.setAttribute('aria-pressed',String(voiceEnabled));
+  document.getElementById('voicePrivacy').textContent=voiceEnabled
+    ? 'Mridul has greeted you. Your microphone listens after he finishes speaking; voice clips are sent to Deepgram for transcription.'
+    : 'Your mic stays off until you choose Start conversation. Mridul will greet you, then listen.';
+}
+
+function submitTextQuery(event) {
+  event.preventDefault();
+  const input=document.getElementById('queryInput');
+  const query=input.value.trim();
+  if(!query) { input.focus(); return; }
+  if(voiceEnabled) { voiceEnabled=false; stopVAD(); updateVoiceButton(); }
+  input.value='';
+  document.getElementById('liveTranscript').textContent='“'+query+'”';
+  document.getElementById('promptRow').style.display='none';
+  addMessage(query, 'user');
+  runPipeline(query);
+}
+
+function usePrompt(query) {
+  document.getElementById('queryInput').value=query;
+  document.getElementById('queryForm').requestSubmit();
+}
+
+// ═══════════════════════════════════════════
+//  Pipeline
+// ═══════════════════════════════════════════
+let SESSION_ID = (() => {
+  let s=sessionStorage.getItem('vfai_sid');
+  if(!s){s=newSessionId();sessionStorage.setItem('vfai_sid',s);}
+  return s;
+})();
+function newSessionId(){return window.crypto?.randomUUID?.()||`${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;}
+
+async function runPipeline(query) {
+  const responseId = ++activeResponseId;
+  stopAnswerAudio();
+  transition(S.PROCESSING);
+  document.getElementById('promptRow').style.display='none';
+  try {
+    const res = await fetch('/query',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({query,session_id:SESSION_ID})});
+    const data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'The request could not be completed');
+    if(responseId!==activeResponseId) return;
+    handleResult(data,responseId);
+  } catch(err) {
+    if(responseId!==activeResponseId) return;
+    transition(S.IDLE);
+    setStatus(err.message || 'Server error. Please try again.');
+  }
+}
+
+const VIEW_TITLES = {
+  fund_list:'Fund Recommendations', detail:'Fund Detail',
+  comparison:'Side by Side', confirmation:'Confirm Your SIP',
+  chart:'Performance & SIP Projection', goal:'Goal-Based Investing & Target SIP',
+};
+
+function handleResult(data,responseId=activeResponseId) {
+  if(responseId!==activeResponseId) return;
+  if(data.type==='noop'){if(voiceEnabled)listen();return;}
+
+  const cardsGrid      = document.getElementById('cardsGrid');
+  const chartContainer = document.getElementById('chartContainer');
+  const goalContainer  = document.getElementById('goalContainer');
+
+    if(data.view==='goal' && data.goal_data){
+    if(document.getElementById('followupRow')) document.getElementById('followupRow').hidden=false;
+    if(cardsGrid) cardsGrid.style.display='none';
+    if(chartContainer) chartContainer.style.display='none';
+    if(goalContainer) goalContainer.style.display='flex';
+    document.getElementById('cardsHeader').textContent=VIEW_TITLES['goal'];
+    renderGoal(data.goal_data);
+  } else if(data.view==='chart' && data.chart_data){
+    if(document.getElementById('followupRow')) document.getElementById('followupRow').hidden=false;
+    if(cardsGrid) cardsGrid.style.display='none';
+    if(goalContainer) goalContainer.style.display='none';
+    if(chartContainer) chartContainer.style.display='flex';
+    document.getElementById('cardsHeader').textContent=VIEW_TITLES['chart'];
+    renderChart(data.chart_data);
+  } else if(data.type==='recommendation' && data.cards && data.cards.length){
+    if(document.getElementById('followupRow')) document.getElementById('followupRow').hidden=false;
+    if(chartContainer) chartContainer.style.display='none';
+    if(goalContainer) goalContainer.style.display='none';
+    if(cardsGrid) cardsGrid.style.display='grid';
+    renderCards(data, VIEW_TITLES[data.view]||'Fund Recommendations');
+  } else if(data.intent==='out_of_scope'){
+    if(chartContainer) chartContainer.style.display='none';
+    if(goalContainer) goalContainer.style.display='none';
+    if(cardsGrid) cardsGrid.style.display='grid';
+    showOOS(data.voice_text);
+  } else {
+    const hasCards = cardsGrid && cardsGrid.children.length>0 && cardsGrid.style.display!=='none';
+    const hasChart = chartContainer && chartContainer.style.display==='flex';
+    const hasGoal  = goalContainer  && goalContainer.style.display==='flex';
+    if(!hasCards && !hasChart && !hasGoal){
+      if(chartContainer) chartContainer.style.display='none';
+      if(goalContainer)  goalContainer.style.display='none';
+      if(cardsGrid) cardsGrid.style.display='none';
+    }
+  }
+  ariaSpeak(data.voice_text, data.audio_token,responseId);
+}
+
+function ariaSpeak(text, token,responseId=activeResponseId) {
+  if(responseId!==activeResponseId) return;
+  transition(S.SPEAKING);
+  document.getElementById('liveTranscript').textContent = '';
+  const bubble = addMessage(text, 'assistant');
+  setRing('ringA', 'speaking');
+  typeWriter(bubble, text, 55);
+
+  pollAudio(token, () => {
+    if(responseId!==activeResponseId) return;
+    transition(S.IDLE);
+    setRing('ringA', 'listening');
+    if(voiceEnabled) listen();
+  },0,responseId);
+}
+
+function typeWriter(el, text, intervalMs) {
+  const words = text.split(' ');
+  let i = 0;
+  el.textContent = '';
+  const tick = setInterval(() => {
+    if (i >= words.length) { clearInterval(tick); return; }
+    el.textContent += (i === 0 ? '' : ' ') + words[i];
+    i++;
+  }, intervalMs);
+}
+
+function addMessage(text, role) {
+  document.body.classList.add('has-conversation');
+  const row=document.createElement('div');
+  row.className='message-row '+(role==='user'?'user':'assistant');
+  const bubble=document.createElement('div');
+  bubble.className='message-bubble';
+  bubble.textContent=role==='user'?text:'';
+  row.appendChild(bubble);
+  const feed=document.getElementById('conversationFeed');
+  feed.appendChild(row);
+  row.scrollIntoView({block:'nearest',behavior:'smooth'});
+  return bubble;
+}
+
+// ═══════════════════════════════════════════
+//  Card builders
+// ═══════════════════════════════════════════
+const CBARS=['bg','bb','bo'];
+function renderCards(data, title) {
+  document.getElementById('chartContainer').style.display='none';
+  document.getElementById('cardsGrid').style.display='grid';
+  document.getElementById('cardsHeader').textContent = title||'Fund Recommendations';
+  document.getElementById('cardsGrid').className =
+    'cards-grid'+(data.cards.length===1?' single':data.cards.length===2?' pair':'');
+  document.getElementById('cardsGrid').innerHTML = data.cards.map((c,i)=>`
+    <div class="fund-card">
+      <div class="cbar ${CBARS[i%3]}"></div>
+      <div class="cbody">
+        <div>
+          <div class="slot-chip">${esc(c.slot)}</div>
+          <div class="fname">${esc(c.name_spoken)}</div>
+          <div class="fhouse">${esc(c.house)}${c.category?' · '+esc(c.category):''}</div>
+        </div>
+        <div><span class="risk-chip ${esc(c.risk_class)}">${esc(c.risk)}</span></div>
+        <div class="rets">
+          <div class="rc"><div class="rcl">1 yr</div><div class="rcv">${esc(c.cagr1)}</div></div>
+          <div class="rc"><div class="rcl">3 yr</div><div class="rcv">${esc(c.cagr3)}</div></div>
+          <div class="rc"><div class="rcl">5 yr</div><div class="rcv">${esc(c.cagr5)}</div></div>
+        </div>
+        <div class="metas">
+          <div class="mi"><div class="ml">NAV</div><div class="mv">${esc(c.nav)}</div></div>
+          <div class="mi"><div class="ml">Min SIP est.</div><div class="mv">${esc(c.min_sip)}</div></div>
+          <div class="mi"><div class="ml">Expense</div><div class="mv">${esc(c.expense)}</div></div>
+        </div>
+        <div class="isin">${esc(c.isin)}</div>
+      </div>
+    </div>`).join('');
+}
+
+function fmtLakhCr(val) {
+  val=Math.round(val);
+  if(val>=10000000){const cr=val/10000000;return '₹'+(cr>=10?cr.toFixed(1):cr.toFixed(2))+' Cr';}
+  if(val>=100000){const lk=val/100000;return '₹'+(lk>=10?lk.toFixed(1):lk.toFixed(2))+' L';}
+  return '₹'+Number(val).toLocaleString('en-IN');
+}
+
+function calcProjections(sip,cagrAnnual,isStepUp){
+  const r=Math.abs(cagrAnnual)>=1e-6?Math.pow(1+cagrAnnual/100,1/12)-1:0;
+  return [1,3,5,10].map(yrs=>{
+    const n=yrs*12;let invested=0,fv=0;
+    if(!isStepUp){
+      invested=sip*n;
+      fv=Math.abs(r)<1e-7?invested:Math.round(sip*((Math.pow(1+r,n)-1)/r)*(1+r));
+    } else {
+      let fvf=0;
+      for(let y=0;y<yrs;y++){const sipY=Math.round(sip*Math.pow(1.1,y));
+        for(let m=0;m<12;m++){invested+=sipY;const mr=n-(y*12+m);
+          fvf+=Math.abs(r)<1e-7?sipY:sipY*Math.pow(1+r,mr);}}
+      fv=Math.round(fvf);
+    }
+    const gain=Math.max(0,fv-invested);
+    return{years:yrs,invested,fv,gain,invested_fmt:fmtLakhCr(invested),fv_fmt:fmtLakhCr(fv),gain_fmt:fmtLakhCr(gain)};
+  });
+}
+
+function renderProjList(projections){
+  return (projections||[]).map(p=>{
+    const invPct=p.fv>0?Math.min(100,Math.round((p.invested/p.fv)*100)):100;
+    return `<div class="proj-row">
+      <div class="proj-top"><span class="proj-tenure">⏳ ${p.years} Year${p.years>1?'s':''}</span><span class="proj-fv">${esc(p.fv_fmt)}</span></div>
+      <div class="proj-bar-track">
+        <div class="proj-bar-invested" style="width:${invPct}%"></div>
+        <div class="proj-bar-gain" style="width:${100-invPct}%"></div>
+      </div>
+      <div class="proj-bottom">
+        <span>Invested: <strong>${esc(p.invested_fmt)}</strong></span>
+        <span>Gain: <strong style="color:var(--good)">+${esc(p.gain_fmt)}</strong></span>
+      </div></div>`;
+  }).join('');
+}
+
+let currentChartData=null;
+function renderChart(data){
+  const container=document.getElementById('chartContainer');
+  if(!container||!data)return;
+  currentChartData=data;
+  const initialSip=data.monthly_sip||10000,initialCagr=data.cagr_used||14;
+  const maxCagr=Math.max(data.cagr1_val||0,data.cagr3_val||0,data.cagr5_val||0,25);
+  const cagrRows=[
+    {label:'1 Year Return',val:data.cagr1_val,fmt:data.cagr1},
+    {label:'3 Year Return (CAGR)',val:data.cagr3_val,fmt:data.cagr3},
+    {label:'5 Year Return (CAGR)',val:data.cagr5_val,fmt:data.cagr5},
+  ];
+  const riskClass=data.risk?'risk-'+data.risk.toLowerCase().replace(/\s+/g,'-'):'';
+  const initialProjections=data.projections||calcProjections(initialSip,initialCagr,false);
+  const maxSipSlider=Math.max(500000,Math.ceil(initialSip/100000)*100000);
+  container.innerHTML=`
+    <div class="chart-header-card">
+      <div><div class="ch-title">${esc(data.name_spoken||data.fund_name)}</div>
+        <div class="ch-sub">${esc(data.house||'')}${data.category?' · '+esc(data.category):''}</div></div>
+      <div class="ch-pills">
+        <span class="ch-pill accent" id="pillSip">SIP ${esc(data.monthly_sip_fmt||fmtLakhCr(initialSip))}/mo</span>
+        <span class="ch-pill" id="pillCagr">Assumed ${initialCagr}% CAGR</span>
+        <span class="risk-chip ${riskClass}">${esc(data.risk||'')}</span>
+      </div>
+    </div>
+    <div class="whatif-panel">
+      <div class="whatif-header">
+        <div class="whatif-title">⚡ What-If Simulator</div>
+        <div class="whatif-badge">Interactive</div>
+      </div>
+      <div class="whatif-grid">
+        <div class="slider-group">
+          <div class="slider-top"><span>Monthly SIP</span><span class="slider-val" id="valSipSlider">${esc(fmtLakhCr(initialSip))}</span></div>
+          <input type="range" class="slider-input" id="sliderSip" min="1000" max="${maxSipSlider}" step="1000" value="${initialSip}" oninput="onWhatIfChange()"/>
+        </div>
+        <div class="slider-group">
+          <div class="slider-top"><span>Expected CAGR</span><span class="slider-val" id="valCagrSlider">${initialCagr}%</span></div>
+          <input type="range" class="slider-input" id="sliderCagr" min="5" max="30" step="0.5" value="${initialCagr}" oninput="onWhatIfChange()"/>
+        </div>
+        <label class="stepup-toggle">
+          <span class="toggle-switch"><input type="checkbox" id="toggleStepup" onchange="onWhatIfChange()"/><span class="toggle-slider"></span></span>
+          <span class="toggle-label">+10% Step-Up</span>
+        </label>
+      </div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-card-title">Historical Returns</div>
+        <div class="cagr-bars">
+          ${cagrRows.map(r=>{const pct=r.val?Math.min(100,Math.max(10,Math.round((r.val/maxCagr)*100))):0;
+            return`<div class="cagr-row">
+              <div class="cagr-label-row"><span>${r.label}</span><span style="color:var(--good)">${esc(r.fmt||'—')}</span></div>
+              <div class="cagr-bar-track"><div class="cagr-bar-fill" style="width:${pct}%"></div></div>
+            </div>`;}).join('')}
+        </div>
+        <div style="font-size:.62rem;color:var(--subtext);margin-top:auto">*Source: mfapi.in (SEBI/AMFI)</div>
+      </div>
+      <div class="chart-card">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div class="chart-card-title" id="projTitle">SIP Wealth Projection</div>
+          <div class="proj-legend">
+            <span><span class="leg-dot" style="background:#b0bfad"></span>Invested</span>
+            <span><span class="leg-dot" style="background:var(--good)"></span>Gain</span>
+          </div>
+        </div>
+        <div class="proj-list" id="projList">${renderProjList(initialProjections)}</div>
+        <div style="font-size:.62rem;color:var(--subtext)" id="projFootnote">*Monthly compounding at ${initialCagr}% p.a.</div>
+      </div>
+    </div>`;
+}
+
+function onWhatIfChange(){
+  const sip=parseInt(document.getElementById('sliderSip')?.value,10);
+  const cagr=parseFloat(document.getElementById('sliderCagr')?.value);
+  const isStepUp=document.getElementById('toggleStepup')?.checked||false;
+  const sipFmt=fmtLakhCr(sip);
+  const valSip=document.getElementById('valSipSlider');if(valSip)valSip.textContent=sipFmt;
+  const valCagr=document.getElementById('valCagrSlider');if(valCagr)valCagr.textContent=cagr+'%';
+  const pSip=document.getElementById('pillSip');if(pSip)pSip.textContent='SIP '+sipFmt+'/mo'+(isStepUp?' (Step-Up)':'');
+  const pCagr=document.getElementById('pillCagr');if(pCagr)pCagr.textContent='Assumed '+cagr+'% CAGR';
+  const pTitle=document.getElementById('projTitle');if(pTitle)pTitle.textContent=isStepUp?'10% Step-Up SIP Projection':'SIP Wealth Projection';
+  const pFoot=document.getElementById('projFootnote');if(pFoot)pFoot.textContent='*'+(isStepUp?'10% annual step-up, ':'')+'Monthly compounding at '+cagr+'% p.a.';
+  const pl=document.getElementById('projList');if(pl)pl.innerHTML=renderProjList(calcProjections(sip,cagr,isStepUp));
+}
+
+function renderGoal(data){
+  const container=document.getElementById('goalContainer');
+  if(!container||!data)return;
+  const timePlan=data.plan_mode==='time_to_goal';
+  const headerTitle=timePlan
+    ?`${data.target_amount_fmt} in about ${data.timeline_fmt||data.target_years+' Years'}`
+    :`${data.target_amount_fmt} in ${data.target_years} Years`;
+  const headerSipLabel=timePlan?'Your Monthly SIP':'Recommended SIP';
+  const headerSipValue=timePlan?(data.user_monthly_sip_fmt||data.recommended_sip_fmt):data.recommended_sip_fmt;
+  const headerHorizonLabel=timePlan?'Estimated Time':'Horizon';
+  const headerHorizonValue=timePlan?(data.timeline_fmt||data.target_years+' Yrs'):data.target_years;
+  const strategiesHtml=(data.strategies||[]).map(s=>{
+    const isRec=s.recommended;
+    const invPct=s.total_invested>0&&data.target_amount>0?Math.min(100,Math.round((s.total_invested/data.target_amount)*100)):50;
+    const timelineRow=timePlan
+      ?`<div class="strat-detail-row"><span>Est. time to target:</span><strong>${esc(s.timeline_fmt||'—')}</strong></div>`
+      :`<div class="strat-detail-row"><span>Total Invested:</span><strong>${esc(s.total_invested_fmt)}</strong></div>`;
+    const stepupRow=!timePlan&&s.stepup_sip_fmt
+      ?`<div class="strat-detail-row" style="margin-top:4px;padding-top:4px;border-top:1px dashed var(--border-strong)">
+          <span>10% Step-Up:</span><strong style="color:var(--good)">${esc(s.stepup_sip_fmt)}/mo</strong></div>`
+      :'';
+    return`<div class="strat-card ${isRec?'recommended':''}">
+      ${isRec?'<div class="rec-tag">★ Recommended</div>':''}
+      <div class="strat-header"><div class="strat-name">${esc(s.name)}</div><div class="strat-cagr">${esc(s.cagr_fmt)} CAGR</div></div>
+      <div class="strat-fund">${esc(s.category)}${s.fund_short?' · '+esc(s.fund_short):''}</div>
+      <div class="strat-sip-block"><div class="strat-sip-label">${esc(s.sip_label||'Required Monthly SIP')}</div>
+        <div class="strat-sip-val" style="${isRec?'color:var(--accent)':''}">${esc(s.required_sip_fmt)}</div></div>
+      <div class="proj-bar-track" style="margin:4px 0">
+        <div class="proj-bar-invested" style="width:${invPct}%"></div>
+        <div class="proj-bar-gain" style="width:${100-invPct}%"></div>
+      </div>
+      <div class="strat-details">
+        ${timelineRow}
+        <div class="strat-detail-row"><span>Total Invested:</span><strong>${esc(s.total_invested_fmt)}</strong></div>
+        <div class="strat-detail-row"><span>Gain:</span><strong style="color:var(--good)">+${esc(s.wealth_gain_fmt)}</strong></div>
+        ${stepupRow}
+        <div class="strat-detail-row"><span>Risk:</span><span>${esc(s.risk)}</span></div>
+      </div></div>`;
+  }).join('');
+  container.innerHTML=`
+    <div class="goal-header-card">
+      <div><div class="goal-badge">🎯 Goal Planning</div>
+        <div class="goal-target-title">${esc(headerTitle)}</div>
+        <div class="goal-target-sub">${data.purpose?'Purpose: <strong>'+esc(data.purpose)+'</strong> · ':''}Target Corpus</div></div>
+      <div class="goal-stat-box">
+        <div class="goal-stat-item"><div class="goal-stat-label">${esc(headerSipLabel)}</div>
+          <div class="goal-stat-val">${esc(headerSipValue)}<span style="font-size:.7rem;color:var(--subtext)">/mo</span></div></div>
+        <div class="goal-stat-item"><div class="goal-stat-label">${esc(headerHorizonLabel)}</div>
+          <div class="goal-stat-val" style="color:var(--text)">${esc(headerHorizonValue)}</div></div>
+      </div>
+    </div>
+    <div class="strategy-grid">${strategiesHtml}</div>
+    ${!timePlan?`<div class="stepup-banner">
+      <div class="stepup-banner-left">
+        <div class="stepup-banner-title">🚀 10% Annual Step-Up Option</div>
+        <div class="stepup-banner-sub">Start smaller, increase SIP by 10% each year with salary hikes — same goal, lower initial burden.</div>
+      </div>
+      <div class="stepup-banner-right"><div class="stepup-val-box">
+        <div class="stepup-val-label">Starting SIP</div>
+        <div class="stepup-val">${esc(data.recommended_stepup_sip_fmt)}/mo</div>
+      </div></div>
+    </div>`:''}`;
+}
+
+function showOOS(text){
+  document.getElementById('cardsHeader').textContent='';
+  document.getElementById('chartContainer').style.display='none';
+  document.getElementById('goalContainer').style.display='none';
+  const cg=document.getElementById('cardsGrid');
+  if(cg){cg.style.display='grid';cg.innerHTML=`<div class="oos"><div class="oos-icon">🚫</div>
+    <div class="oos-title">Out of Scope</div>
+    <div class="oos-body">I only help with mutual funds and SIP investments in India.</div>
+    <div class="oos-quote">${esc(text)}</div></div>`;}
+}
+function showClarify(text){
+  document.getElementById('cardsHeader').textContent='';
+  document.getElementById('chartContainer').style.display='none';
+  document.getElementById('goalContainer').style.display='none';
+  const cg=document.getElementById('cardsGrid');
+  if(cg){cg.style.display='grid';cg.innerHTML=`<div class="oos"><div class="oos-icon">❓</div>
+    <div class="oos-title">One more thing…</div>
+    <div class="oos-body">I need a bit more detail to find the right funds for you.</div>
+    <div class="oos-quote">${esc(text)}</div></div>`;}
+}
+
+// ═══════════════════════════════════════════
+//  Audio
+// ═══════════════════════════════════════════
+function stopAnswerAudio(){
+  const aud=document.getElementById('aud');
+  if(!aud) return;
+  aud.pause();
+  aud.onended=null;
+  aud.onerror=null;
+  if(activeAudioUrl){URL.revokeObjectURL(activeAudioUrl);activeAudioUrl=null;}
+}
+function voiceUnavailable(message,onEnd,responseId=activeResponseId){
+  if(responseId!==activeResponseId) return;
+  setStatus(message||'Voice playback is unavailable. Your written response is still here.');
+  onEnd&&onEnd();
+}
+function synthAndPlay(text,onEnd){
+  const responseId=activeResponseId;
+  fetch('/synthesize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text})})
+    .then(async r=>{const d=await r.json();if(!r.ok)throw new Error(d.error||'Voice generation failed.');return d;})
+    .then(d=>pollAudio(d.token,onEnd,0,responseId))
+    .catch(e=>voiceUnavailable(e.message,onEnd,responseId));
+}
+function pollAudio(token,onEnd,n=0,responseId=activeResponseId){
+  if(responseId!==activeResponseId) return;
+  if(!token || n>150){voiceUnavailable('Voice generation timed out. Your written response is still here.',onEnd,responseId);return;}
+  setTimeout(async()=>{
+    if(responseId!==activeResponseId) return;
+    try{
+      const r=await fetch('/audio/'+token);
+      if(responseId!==activeResponseId) return;
+      if(r.status===202){pollAudio(token,onEnd,n+1,responseId);return;}
+      if(!r.ok){let d={};try{d=await r.json();}catch{}voiceUnavailable(d.error||'Natural voice playback failed. Your written response is still here.',onEnd,responseId);return;}
+      const url=URL.createObjectURL(await r.blob());
+      if(responseId!==activeResponseId){URL.revokeObjectURL(url);return;}
+      stopAnswerAudio();
+      activeAudioUrl=url;
+      const aud=document.getElementById('aud');
+      aud.onended=null;aud.onerror=null;aud.src=url;aud.controls=true;aud.hidden=false;
+      let fired=false;const done=()=>{if(!fired&&responseId===activeResponseId){fired=true;if(activeAudioUrl===url){URL.revokeObjectURL(url);activeAudioUrl=null;}onEnd&&onEnd();}};
+      aud.onended=done;
+      aud.onerror=()=>voiceUnavailable('Could not play the generated voice. Use the audio controls to retry.',done,responseId);
+      aud.play().catch(()=>{if(responseId===activeResponseId)setStatus('Tap play in the audio controls to hear the response.');});
+    }catch(e){voiceUnavailable('Voice playback is unavailable. Your written response is still here.',onEnd,responseId);}
+  },100);
+}
+
+// ═══════════════════════════════════════════
+//  Navigation & Helpers
+// ═══════════════════════════════════════════
+function goHome(){
+  activeResponseId++;
+  stopAnswerAudio();
+  stopVAD();
+  voiceEnabled=false;
+  updateVoiceButton();
+  SESSION_ID = newSessionId();
+  sessionStorage.setItem('vfai_sid', SESSION_ID);
+  document.getElementById('cardsGrid').innerHTML='';
+  document.getElementById('cardsGrid').style.display='none';
+  document.getElementById('followupRow').hidden=true;
+  document.getElementById('chartContainer').style.display='none';
+  document.getElementById('goalContainer').style.display='none';
+  document.getElementById('conversationFeed').replaceChildren();
+  document.getElementById('liveTranscript').textContent='';
+  document.getElementById('cardsHeader').textContent='';
+  setStatus('Namaste! Kya main aapki madad kar sakta hoon?');
+  transition(S.IDLE);
+  document.body.classList.remove('has-conversation');
+  document.getElementById('promptRow').style.display='flex';
+  document.getElementById('queryInput').value='';
+}
+
+function transition(s){
+  state=s;
+  const STATUS_TEXT={
+    [S.IDLE]:'Ready when you are',
+    [S.LISTENING]:'Listening…',
+    [S.HEARD]:'Got it…',
+    [S.PROCESSING]:'Thinking…',
+    [S.SPEAKING]:'Speaking…',
+  };
+  if(s!==S.HEARD) setStatus(STATUS_TEXT[s]||'');
+  setRing('ringA',s);
+  // Sync ambient orb
+  const orb = document.getElementById('ambientOrb');
+  if(orb) orb.className = 'ambient-orb ' + s;
+  // Sync hero status colour class
+  const st = document.getElementById('heroStatus');
+  if(st){ st.className='hero-status'; if(s===S.SPEAKING||s===S.HEARD||s===S.PROCESSING) st.classList.add(s); }
+}
+function setRing(id,cls){
+  const r1=document.getElementById('ringA');
+  const r2=document.getElementById('ringA2');
+  const r3=document.getElementById('ringA3');
+  if(r1) r1.className='av-ring '+cls;
+  if(r2) r2.className='av-ring2 '+cls;
+  if(r3) r3.className='av-ring3 '+cls;
+}
+function setStatus(text){
+  const el=document.getElementById('heroStatus');if(el)el.textContent=text;
+}
+function showVolBars(on){
+  const vA=document.getElementById('volA');
+  if(vA) vA.style.display=on?'flex':'none';
+}
+function animVol(rms){
+  const sc=Math.min(rms/0.07,1);
+  const ids=['va0','va1','va2','va3','va4','va5','va6'];
+  const hs=[6,12,20,26,20,12,6];
+  ids.forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.style.height=(2+sc*hs[i]*(0.6+Math.random()*.4))+'px';
+  });
+}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function delay(ms){return new Promise(r=>setTimeout(r,ms));}
+</script>
+</body>
+</html>

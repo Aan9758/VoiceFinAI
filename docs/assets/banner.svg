@@ -1,0 +1,111 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360" width="100%" height="360" style="background:#09120a;border-radius:16px;overflow:hidden">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#071008"/>
+      <stop offset="40%" stop-color="#0e1f11"/>
+      <stop offset="100%" stop-color="#09130a"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#2ecc71"/>
+      <stop offset="50%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#a3e635"/>
+    </linearGradient>
+    <linearGradient id="glowGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#22c55e" stop-opacity="0.35"/>
+      <stop offset="100%" stop-color="#15803d" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="barGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#4ade80"/>
+      <stop offset="100%" stop-color="#15803d"/>
+    </linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="360" fill="url(#bgGrad)"/>
+  <rect width="1200" height="360" fill="url(#grid)"/>
+
+  <!-- Ambient Light Orbs -->
+  <circle cx="150" cy="80" r="180" fill="url(#glowGrad)" filter="blur(60px)"/>
+  <circle cx="1050" cy="280" r="220" fill="url(#glowGrad)" filter="blur(80px)"/>
+
+  <!-- Left Content -->
+  <g transform="translate(80, 75)">
+    <!-- Category Pill -->
+    <rect x="0" y="0" width="180" height="30" rx="15" fill="rgba(46,204,113,0.12)" stroke="rgba(74,222,128,0.3)" stroke-width="1"/>
+    <circle cx="15" cy="15" r="4" fill="#4ade80"/>
+    <text x="28" y="19" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="700" fill="#4ade80" letter-spacing="1.5">VOICE FINTECH AI</text>
+
+    <!-- Main Title -->
+    <text x="0" y="85" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="56" font-weight="900" fill="#ffffff" letter-spacing="-1.5">
+      VoiceFin<tspan fill="url(#accentGrad)">AI</tspan>
+    </text>
+
+    <!-- Subtitle -->
+    <text x="0" y="125" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="20" font-weight="500" fill="#94a3b8">
+      Zero-Hallucination Conversational Voice AI for Indian Mutual Funds
+    </text>
+
+    <!-- Tagline & Core Architecture -->
+    <text x="0" y="155" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="14" font-weight="400" fill="#64748b">
+      Cryptographic AuditStream Firewall · Deepgram Nova-3 · Groq LPU · Code-Switching Hinglish
+    </text>
+
+    <!-- Badges Row -->
+    <g transform="translate(0, 185)">
+      <!-- Badge 1: Audit Firewall -->
+      <g transform="translate(0, 0)">
+        <rect width="170" height="28" rx="6" fill="#132416" stroke="rgba(74,222,128,0.25)" stroke-width="1"/>
+        <text x="12" y="18" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#86efac">🛡️ Zero Hallucination</text>
+      </g>
+      <!-- Badge 2: Latency -->
+      <g transform="translate(180, 0)">
+        <rect width="145" height="28" rx="6" fill="#132416" stroke="rgba(74,222,128,0.25)" stroke-width="1"/>
+        <text x="12" y="18" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#86efac">⚡ &lt;800ms Latency</text>
+      </g>
+      <!-- Badge 3: Multilingual -->
+      <g transform="translate(335, 0)">
+        <rect width="175" height="28" rx="6" fill="#132416" stroke="rgba(74,222,128,0.25)" stroke-width="1"/>
+        <text x="12" y="18" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#86efac">🌐 Hindi / Eng / Hinglish</text>
+      </g>
+      <!-- Badge 4: SEBI / AMFI -->
+      <g transform="translate(520, 0)">
+        <rect width="165" height="28" rx="6" fill="#132416" stroke="rgba(74,222,128,0.25)" stroke-width="1"/>
+        <text x="12" y="18" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#86efac">📈 Live AMFI Data</text>
+      </g>
+    </g>
+  </g>
+
+  <!-- Right Visual: Stylized Glowing Sound Waveform & Orb -->
+  <g transform="translate(860, 60)">
+    <!-- Outer Glow Ring -->
+    <circle cx="120" cy="120" r="105" fill="none" stroke="rgba(74,222,128,0.15)" stroke-width="1.5" stroke-dasharray="6 6"/>
+    <circle cx="120" cy="120" r="85" fill="none" stroke="rgba(74,222,128,0.25)" stroke-width="1.5"/>
+    <circle cx="120" cy="120" r="65" fill="#102514" stroke="rgba(74,222,128,0.6)" stroke-width="2"/>
+
+    <!-- Waveform Bars -->
+    <g transform="translate(55, 75)">
+      <rect x="0" y="32" width="6" height="26" rx="3" fill="url(#barGrad)"/>
+      <rect x="12" y="20" width="6" height="50" rx="3" fill="url(#barGrad)"/>
+      <rect x="24" y="8" width="6" height="74" rx="3" fill="url(#barGrad)"/>
+      <rect x="36" y="24" width="6" height="42" rx="3" fill="url(#barGrad)"/>
+      <rect x="48" y="0" width="6" height="90" rx="3" fill="url(#barGrad)"/>
+      <rect x="60" y="18" width="6" height="54" rx="3" fill="url(#barGrad)"/>
+      <rect x="72" y="28" width="6" height="34" rx="3" fill="url(#barGrad)"/>
+      <rect x="84" y="12" width="6" height="66" rx="3" fill="url(#barGrad)"/>
+      <rect x="96" y="30" width="6" height="30" rx="3" fill="url(#barGrad)"/>
+      <rect x="108" y="38" width="6" height="14" rx="3" fill="url(#barGrad)"/>
+      <rect x="120" y="41" width="6" height="8" rx="3" fill="url(#barGrad)"/>
+    </g>
+
+    <!-- Floating Financial Metric Card Preview -->
+    <g transform="translate(10, 195)">
+      <rect width="220" height="54" rx="10" fill="rgba(15,23,42,0.85)" stroke="rgba(74,222,128,0.3)" stroke-width="1"/>
+      <text x="14" y="22" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="700" fill="#94a3b8">PARAG PARIKH FLEXI CAP</text>
+      <text x="14" y="42" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="13" font-weight="800" fill="#4ade80">3Y CAGR: +12.05%</text>
+      <text x="148" y="42" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#38bdf8">NAV: ₹89.85</text>
+    </g>
+  </g>
+</svg>

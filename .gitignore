@@ -1,0 +1,37 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# Temporary and extraction artifacts
+scratch/
+__fix_extract__/
+*.zip
+*.bak
+*.log
+
+# Caches
+data/mfapi_cache.json
+
+# IDE and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
